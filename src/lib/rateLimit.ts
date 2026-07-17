@@ -5,13 +5,7 @@
  * Development: Falls back to an in-memory sliding window automatically
  */
 
-// ─── Upstash (production) ────────────────────────────────────────────────────
-type UpstashRatelimit = {
-  limit: (
-    identifier: string,
-  ) => Promise<{ success: boolean; remaining: number; reset: number }>;
-};
-const upstashLimiters = new Map<number, UpstashRatelimit>();
+const upstashLimiters = new Map<number, any>();
 
 function getUpstashRatelimit(limitPerMinute: number) {
   if (
@@ -145,23 +139,15 @@ export async function rateLimit(
   limit = 10,
 ): Promise<boolean> {
   let rl = upstashLimiters.get(limit);
-
   if (!rl) {
-    const newRl = getUpstashRatelimit(limit);
-    if (newRl) {
-      rl = newRl;
+    rl = getUpstashRatelimit(limit);
+    if (rl) {
       upstashLimiters.set(limit, rl);
     }
   }
 
   if (rl) {
-    const { success, remaining, reset } = await rl.limit(identifier);
-    rateLimitInfoStore.set(identifier, {
-      count: limit - remaining,
-      remaining,
-      resetTime: reset,
-      isLimited: !success,
-    });
+    const { success } = await rl.limit(identifier);
     return success;
   }
 
@@ -171,46 +157,12 @@ export async function rateLimit(
 export async function getRateLimitInfo(
   identifier: string,
   limit = 10,
-): Promise<{
+): {
   count: number;
   remaining: number;
   resetTime: number;
   isLimited: boolean;
-} | null> {
-  const cached = rateLimitInfoStore.get(identifier);
-  if (cached) {
-    return cached;
-  }
-
-  let rl = upstashLimiters.get(limit);
-  if (!rl) {
-    const newRl = getUpstashRatelimit(limit);
-    if (newRl) {
-      rl = newRl;
-      upstashLimiters.set(limit, rl);
-    }
-  }
-
-  if (rl) {
-    try {
-      const rlAny = rl as any;
-      if (typeof rlAny.get === "function") {
-        const result = await rlAny.get(identifier);
-        if (result) {
-          const { remaining, reset } = result;
-          return {
-            count: limit - remaining,
-            remaining,
-            resetTime: reset,
-            isLimited: remaining <= 0,
-          };
-        }
-      }
-    } catch (e) {
-      console.warn("Error querying Upstash ratelimit info:", e);
-    }
-  }
-
+} | null {
   return memGetInfo(identifier, limit);
 }
 
