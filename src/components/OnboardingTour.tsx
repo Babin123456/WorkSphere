@@ -118,7 +118,7 @@ export function OnboardingTour() {
           fontSize: "11px",
           letterSpacing: "0.05em",
         },
-      }}
+      } as any}
     />
   );
 }

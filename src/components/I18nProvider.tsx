@@ -11,6 +11,7 @@ import es from "../locales/es.json";
 import fr from "../locales/fr.json";
 import de from "../locales/de.json";
 import hi from "../locales/hi.json";
+import it from "../locales/it.json";
 
 // Initialize i18next outside of component to avoid re-initialization
 i18n
@@ -22,7 +23,8 @@ i18n
       es: { translation: es },
       fr: { translation: fr },
       de: { translation: de },
-      hi: { translation: hi }
+      hi: { translation: hi },
+      it: { translation: it }
     },
     fallbackLng: "en",
     interpolation: {

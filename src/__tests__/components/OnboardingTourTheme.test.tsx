@@ -3,7 +3,7 @@ import React from "react";
 import { render } from "@testing-library/react";
 
 // Mock react-joyride
-const mockJoyride = jest.fn(() => null);
+const mockJoyride = jest.fn((..._args: any[]) => null);
 jest.mock("react-joyride", () => ({
   Joyride: (props: any) => {
     mockJoyride(props);

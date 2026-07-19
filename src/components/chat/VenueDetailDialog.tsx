@@ -42,6 +42,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
+// Hook for multi-language translation support
 import { useTranslation } from "react-i18next";
 
 import { Venue } from "./ChatMessages";
